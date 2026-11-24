@@ -1,0 +1,274 @@
+{
+  "info": {
+    "name": "Social Network · Домашнее задание",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:5080"
+    },
+    {
+      "key": "user_id",
+      "value": ""
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "demo_password",
+      "value": "Homework-demo-2026!"
+    }
+  ],
+  "item": [
+    {
+      "name": "Регистрация",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "pm.collectionVariables.unset('user_id');",
+              "pm.collectionVariables.unset('token');",
+              "pm.test('Получен UUID пользователя', () => {",
+              "  const id = pm.response.json().user_id;",
+              "  pm.expect(id).to.match(/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i);",
+              "  pm.collectionVariables.set('user_id', id);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/user/register",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"first_name\": \"Анна\",\n  \"second_name\": \"Иванова\",\n  \"birthdate\": \"1995-04-12\",\n  \"gender\": \"female\",\n  \"biography\": \"Книги и путешествия\",\n  \"city\": \"О'Коннор\",\n  \"password\": \"{{demo_password}}\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Вход",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "pm.test('Получен токен', () => {",
+              "  const token = pm.response.json().token;",
+              "  pm.expect(token).to.be.a('string').and.not.empty;",
+              "  pm.collectionVariables.set('token', token);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/login",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"{{user_id}}\",\n  \"password\": \"{{demo_password}}\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Публичная анкета",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "pm.test('Все поля анкеты сохранены', () => {",
+              "  const profile = pm.response.json();",
+              "  pm.expect(profile.id).to.eql(pm.collectionVariables.get('user_id'));",
+              "  pm.expect(profile.first_name).to.eql(\"Анна\");",
+              "  pm.expect(profile.second_name).to.eql(\"Иванова\");",
+              "  pm.expect(profile.birthdate).to.eql(\"1995-04-12\");",
+              "  pm.expect(profile.gender).to.eql(\"female\");",
+              "  pm.expect(profile.biography).to.eql(\"Книги и путешествия\");",
+              "  pm.expect(profile.city).to.eql(\"О'Коннор\");",
+              "  pm.expect(profile).not.to.have.property('password');",
+              "  pm.expect(profile).not.to.have.property('password_hash');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/user/get/{{user_id}}"
+      }
+    },
+    {
+      "name": "Своя анкета с токеном",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "pm.test('Все поля анкеты сохранены', () => {",
+              "  const profile = pm.response.json();",
+              "  pm.expect(profile.id).to.eql(pm.collectionVariables.get('user_id'));",
+              "  pm.expect(profile.first_name).to.eql(\"Анна\");",
+              "  pm.expect(profile.second_name).to.eql(\"Иванова\");",
+              "  pm.expect(profile.birthdate).to.eql(\"1995-04-12\");",
+              "  pm.expect(profile.gender).to.eql(\"female\");",
+              "  pm.expect(profile.biography).to.eql(\"Книги и путешествия\");",
+              "  pm.expect(profile.city).to.eql(\"О'Коннор\");",
+              "  pm.expect(profile).not.to.have.property('password');",
+              "  pm.expect(profile).not.to.have.property('password_hash');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/user/me",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Своя анкета без токена",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/user/me"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Неверный пароль",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/login",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"{{user_id}}\",\n  \"password\": \"Wrong-demo-password!\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Несуществующая анкета",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/user/get/f812d33c-3a28-4e40-936b-ed8c5526222a"
+      }
+    },
+    {
+      "name": "Некорректный ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/user/get/not-a-uuid"
+      }
+    },
+    {
+      "name": "Регистрация без пола",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/user/register",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"first_name\": \"Анна\",\n  \"second_name\": \"Иванова\",\n  \"birthdate\": \"1995-04-12\",\n  \"biography\": \"Книги и путешествия\",\n  \"city\": \"О'Коннор\",\n  \"password\": \"{{demo_password}}\"\n}"
+        }
+      }
+    }
+  ]
+}

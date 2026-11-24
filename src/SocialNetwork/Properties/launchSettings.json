@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "SocialNetwork": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:56430;http://127.0.0.1:5080"
+    }
+  }
+}
