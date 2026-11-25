@@ -1,0 +1,59 @@
+Алек / Иван
+Gather Merge  (cost=21490.69..21617.40 rows=1086 width=68) (actual time=23.588..27.560 rows=1388 loops=1)
+  Workers Planned: 2
+  Workers Launched: 2
+  Buffers: shared hit=14328
+  ->  Sort  (cost=20490.67..20492.02 rows=543 width=68) (actual time=21.405..21.451 rows=463 loops=3)
+        Sort Key: id
+        Sort Method: quicksort  Memory: 69kB
+        Buffers: shared hit=14328
+        Worker 0:  Sort Method: quicksort  Memory: 65kB
+        Worker 1:  Sort Method: quicksort  Memory: 63kB
+        ->  Parallel Seq Scan on users  (cost=0.00..20466.00 rows=543 width=68) (actual time=0.109..21.218 rows=463 loops=3)
+              Filter: (((first_name)::text ~~ 'Алек%'::text) AND ((second_name)::text ~~ 'Иван%'::text))
+              Rows Removed by Filter: 332871
+              Buffers: shared hit=14216
+Planning:
+  Buffers: shared hit=123
+Planning Time: 0.381 ms
+Execution Time: 27.632 ms
+
+Дми / Кузне
+Gather Merge  (cost=21469.79..21495.70 rows=222 width=68) (actual time=19.725..22.398 rows=293 loops=1)
+  Workers Planned: 2
+  Workers Launched: 2
+  Buffers: shared hit=14328
+  ->  Sort  (cost=20469.77..20470.05 rows=111 width=68) (actual time=17.821..17.828 rows=98 loops=3)
+        Sort Key: id
+        Sort Method: quicksort  Memory: 34kB
+        Buffers: shared hit=14328
+        Worker 0:  Sort Method: quicksort  Memory: 33kB
+        Worker 1:  Sort Method: quicksort  Memory: 32kB
+        ->  Parallel Seq Scan on users  (cost=0.00..20466.00 rows=111 width=68) (actual time=0.216..17.739 rows=98 loops=3)
+              Filter: (((first_name)::text ~~ 'Дми%'::text) AND ((second_name)::text ~~ 'Кузне%'::text))
+              Rows Removed by Filter: 333236
+              Buffers: shared hit=14216
+Planning:
+  Buffers: shared hit=123
+Planning Time: 0.397 ms
+Execution Time: 22.451 ms
+
+Конст / Оси
+Gather Merge  (cost=21466.51..21471.65 rows=44 width=68) (actual time=17.960..20.575 rows=27 loops=1)
+  Workers Planned: 2
+  Workers Launched: 2
+  Buffers: shared hit=14328
+  ->  Sort  (cost=20466.49..20466.55 rows=22 width=68) (actual time=16.303..16.304 rows=9 loops=3)
+        Sort Key: id
+        Sort Method: quicksort  Memory: 25kB
+        Buffers: shared hit=14328
+        Worker 0:  Sort Method: quicksort  Memory: 26kB
+        Worker 1:  Sort Method: quicksort  Memory: 25kB
+        ->  Parallel Seq Scan on users  (cost=0.00..20466.00 rows=22 width=68) (actual time=3.067..16.252 rows=9 loops=3)
+              Filter: (((first_name)::text ~~ 'Конст%'::text) AND ((second_name)::text ~~ 'Оси%'::text))
+              Rows Removed by Filter: 333324
+              Buffers: shared hit=14216
+Planning:
+  Buffers: shared hit=123
+Planning Time: 0.378 ms
+Execution Time: 20.612 ms

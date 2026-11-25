@@ -1,0 +1,38 @@
+{
+  "postgres": "PostgreSQL 17.12 (Debian 17.12-1.pgdg13+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit | en_US.utf8",
+  "settings": "max_connections=100\nmax_parallel_workers_per_gather=2\nserver_encoding=UTF8\nshared_buffers=163848kB\nwork_mem=4096kB",
+  "sha256": "7e67312e0a42c3377bd60248329ab5025b1bcfbd13848ffdff57770413bb1ec1",
+  "source_rows": 999930,
+  "rows": [
+    1000000,
+    138,
+    1006
+  ],
+  "host": "Windows-11-10.0.26300-SP0",
+  "host_cpus": 32,
+  "k6": "k6.exe v2.4.0 (commit/dd9395906d, go1.26.11, windows/amd64)",
+  "cases": [
+    [
+      "Алек",
+      "Иван",
+      57378,
+      23537,
+      1388
+    ],
+    [
+      "Дми",
+      "Кузне",
+      17846,
+      16573,
+      293
+    ],
+    [
+      "Конст",
+      "Оси",
+      7987,
+      4036,
+      27
+    ]
+  ],
+  "duration": 15
+}

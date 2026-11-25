@@ -1,0 +1,50 @@
+Алек / Иван
+Sort  (cost=4627.25..4630.68 rows=1375 width=68) (actual time=4.572..4.634 rows=1388 loops=1)
+  Sort Key: id
+  Sort Method: quicksort  Memory: 172kB
+  Buffers: shared hit=1345
+  ->  Bitmap Heap Scan on users  (cost=493.27..4555.57 rows=1375 width=68) (actual time=0.341..4.268 rows=1388 loops=1)
+        Filter: (((first_name)::text ~~ 'Алек%'::text) AND ((second_name)::text ~~ 'Иван%'::text))
+        Heap Blocks: exact=1317
+        Buffers: shared hit=1342
+        ->  Bitmap Index Scan on users_search_prefix_idx  (cost=0.00..492.93 rows=1371 width=0) (actual time=0.259..0.259 rows=1388 loops=1)
+              Index Cond: (((second_name)::text ~>=~ 'Иван'::text) AND ((second_name)::text ~<~ 'Ивао'::text) AND ((first_name)::text ~>=~ 'Алек'::text) AND ((first_name)::text ~<~ 'Алел'::text))
+              Buffers: shared hit=25
+Planning:
+  Buffers: shared hit=192
+Planning Time: 0.492 ms
+Execution Time: 4.716 ms
+
+Дми / Кузне
+Sort  (cost=1354.79..1355.50 rows=284 width=68) (actual time=1.358..1.367 rows=293 loops=1)
+  Sort Key: id
+  Sort Method: quicksort  Memory: 50kB
+  Buffers: shared hit=294 read=16
+  ->  Bitmap Heap Scan on users  (cost=333.50..1343.22 rows=284 width=68) (actual time=0.178..1.284 rows=293 loops=1)
+        Filter: (((first_name)::text ~~ 'Дми%'::text) AND ((second_name)::text ~~ 'Кузне%'::text))
+        Heap Blocks: exact=290
+        Buffers: shared hit=291 read=16
+        ->  Bitmap Index Scan on users_search_prefix_idx  (cost=0.00..333.43 rows=283 width=0) (actual time=0.150..0.151 rows=293 loops=1)
+              Index Cond: (((second_name)::text ~>=~ 'Кузне'::text) AND ((second_name)::text ~<~ 'Кузнж'::text) AND ((first_name)::text ~>=~ 'Дми'::text) AND ((first_name)::text ~<~ 'Дмй'::text))
+              Buffers: shared hit=1 read=16
+Planning:
+  Buffers: shared hit=192
+Planning Time: 0.451 ms
+Execution Time: 1.403 ms
+
+Конст / Оси
+Sort  (cost=418.85..419.01 rows=65 width=68) (actual time=0.321..0.322 rows=27 loops=1)
+  Sort Key: id
+  Sort Method: quicksort  Memory: 27kB
+  Buffers: shared hit=31 read=6
+  ->  Bitmap Heap Scan on users  (cost=172.81..416.89 rows=65 width=68) (actual time=0.088..0.298 rows=27 loops=1)
+        Filter: (((first_name)::text ~~ 'Конст%'::text) AND ((second_name)::text ~~ 'Оси%'::text))
+        Heap Blocks: exact=27
+        Buffers: shared hit=28 read=6
+        ->  Bitmap Index Scan on users_search_prefix_idx  (cost=0.00..172.80 rows=64 width=0) (actual time=0.069..0.070 rows=27 loops=1)
+              Index Cond: (((second_name)::text ~>=~ 'Оси'::text) AND ((second_name)::text ~<~ 'Осй'::text) AND ((first_name)::text ~>=~ 'Конст'::text) AND ((first_name)::text ~<~ 'Консу'::text))
+              Buffers: shared hit=1 read=6
+Planning:
+  Buffers: shared hit=192
+Planning Time: 0.440 ms
+Execution Time: 0.354 ms

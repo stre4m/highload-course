@@ -1,0 +1,86 @@
+{
+  "before": [
+    {
+      "concurrency": 1,
+      "seconds": 15.0,
+      "successes": 671,
+      "errors": 0,
+      "rps": 44.733333333333334,
+      "p50": 21,
+      "p95": 24,
+      "p99": 26
+    },
+    {
+      "concurrency": 10,
+      "seconds": 15.0,
+      "successes": 3594,
+      "errors": 0,
+      "rps": 239.6,
+      "p50": 36,
+      "p95": 61,
+      "p99": 68
+    },
+    {
+      "concurrency": 100,
+      "seconds": 15.175,
+      "successes": 5084,
+      "errors": 0,
+      "rps": 335.0247116968698,
+      "p50": 276,
+      "p95": 379,
+      "p99": 461
+    },
+    {
+      "concurrency": 1000,
+      "seconds": 17.659,
+      "successes": 5465,
+      "errors": 0,
+      "rps": 309.47392264567645,
+      "p50": 2738,
+      "p95": 2863,
+      "p99": 2929
+    }
+  ],
+  "after": [
+    {
+      "concurrency": 1,
+      "seconds": 15.0,
+      "successes": 8454,
+      "errors": 0,
+      "rps": 563.6,
+      "p50": 1,
+      "p95": 4,
+      "p99": 4
+    },
+    {
+      "concurrency": 10,
+      "seconds": 15.0,
+      "successes": 65207,
+      "errors": 0,
+      "rps": 4347.133333333333,
+      "p50": 2,
+      "p95": 5,
+      "p99": 6
+    },
+    {
+      "concurrency": 100,
+      "seconds": 15.0,
+      "successes": 108330,
+      "errors": 0,
+      "rps": 7222.0,
+      "p50": 8,
+      "p95": 20,
+      "p99": 27
+    },
+    {
+      "concurrency": 1000,
+      "seconds": 15.007,
+      "successes": 93800,
+      "errors": 0,
+      "rps": 6250.416472312921,
+      "p50": 8,
+      "p95": 30,
+      "p99": 59
+    }
+  ]
+}

@@ -31,6 +31,22 @@ public sealed class UsersController(UserStore users, PasswordHasher<string> hash
         return Ok(new RegisterResponse(profile.Id));
     }
 
+    [HttpGet("search")]
+    [ProducesResponseType<IReadOnlyList<UserSearchResult>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Search(
+        [FromQuery(Name = "first_name")] string firstName,
+        [FromQuery(Name = "last_name")] string lastName,
+        CancellationToken ct)
+    {
+        var firstPrefix = firstName.Trim();
+        var lastPrefix = lastName.Trim();
+        if (!ValidText(firstPrefix, 100) || !ValidText(lastPrefix, 100))
+            return BadRequest();
+
+        return Ok(await users.SearchAsync(firstPrefix, lastPrefix, ct));
+    }
+
     [HttpGet("get/{id}")]
     [ProducesResponseType<Profile>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
