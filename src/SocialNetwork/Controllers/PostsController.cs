@@ -8,8 +8,10 @@ namespace SocialNetwork.Controllers;
 [ApiController]
 [Authorize]
 [Route("post")]
-public sealed class PostsController(FeedCache feed, PostStore posts) : ControllerBase
+public sealed class PostsController(FeedCache feed, PostStore posts, IServiceProvider services) : ControllerBase
 {
+    private readonly FeedDeliveryStore? delivery = services.GetService<FeedDeliveryStore>();
+
     [HttpGet("feed")]
     [ProducesResponseType<IReadOnlyList<Post>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -22,7 +24,9 @@ public sealed class PostsController(FeedCache feed, PostStore posts) : Controlle
         if (!TryGetUserId(out var userId))
             return Unauthorized();
 
-        return Ok(await feed.GetAsync(userId, offset, limit, ct));
+        return Ok(delivery is null
+            ? await feed.GetAsync(userId, offset, limit, ct)
+            : await delivery.GetFeedAsync(userId, offset, limit, ct));
     }
 
     [HttpPost("create")]
@@ -36,7 +40,9 @@ public sealed class PostsController(FeedCache feed, PostStore posts) : Controlle
         if (!IsValidText(request.Text))
             return BadRequest();
 
-        return Ok(await feed.CreatePostAsync(userId, request.Text!, ct));
+        return Ok(delivery is null
+            ? await feed.CreatePostAsync(userId, request.Text!, ct)
+            : await posts.CreateAsync(userId, request.Text!, ct, enqueue: true));
     }
 
     [HttpPut("update")]

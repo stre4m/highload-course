@@ -2,9 +2,11 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.BearerToken;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi;
 using Npgsql;
+using RabbitMQ.Client;
 using SocialNetwork;
 using SocialNetwork.OpenApi;
 using SocialNetwork.Controllers;
@@ -37,6 +39,26 @@ builder.Services.AddSingleton(services => new DialogStore(
 builder.Services.AddSingleton<FeedRefreshQueue>();
 builder.Services.AddSingleton<FeedCache>();
 builder.Services.AddHostedService<FeedRefreshWorker>();
+var rabbitConnectionString = builder.Configuration.GetConnectionString("RabbitMq");
+if (!string.IsNullOrWhiteSpace(rabbitConnectionString))
+{
+    builder.Services.AddSingleton<FeedDeliveryStore>();
+    builder.Services.AddSingleton(_ => new FeedBroker(new ConnectionFactory
+    {
+        Uri = new Uri(rabbitConnectionString),
+        AutomaticRecoveryEnabled = false,
+        ClientProvidedName = $"social-network:{Environment.MachineName}"
+    }));
+    builder.Services.AddHostedService<FeedDeliveryWorker>();
+    builder.Services.AddSingleton<FeedSocketSubscriptions>();
+    builder.Services.AddHostedService(services => services.GetRequiredService<FeedSocketSubscriptions>());
+}
+var keyPath = builder.Configuration["DataProtection:KeyPath"];
+if (!string.IsNullOrWhiteSpace(keyPath))
+{
+    builder.Services.AddDataProtection().SetApplicationName("SocialNetwork")
+        .PersistKeysToFileSystem(new DirectoryInfo(keyPath));
+}
 builder.Services.Configure<PasswordHasherOptions>(options => options.IterationCount = 210_000);
 builder.Services.AddControllers()
     .AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower)
@@ -75,5 +97,10 @@ if (app.Environment.IsDevelopment())
 }
 app.UseAuthentication();
 app.UseAuthorization();
+if (!string.IsNullOrWhiteSpace(rabbitConnectionString))
+{
+    app.UseWebSockets(new WebSocketOptions { KeepAliveTimeout = TimeSpan.FromSeconds(20) });
+    app.MapGet("/post/feed/posted", FeedSocket.SubscribeAsync).RequireAuthorization().ExcludeFromDescription();
+}
 app.MapControllers();
 app.Run();

@@ -60,6 +60,10 @@ python scripts/search-charts.py TestResults/hw2-k6/metrics.json TestResults/hw2-
 
 [Инструкция по запуску и проверке](docs/homework-5/README.md) описывает отдельный Compose-стенд, проверку API и перевод записей на третий экземпляр PostgreSQL.
 
+## ДЗ №6. Онлайн-обновление ленты новостей
+
+[Инструкция по запуску и проверке](docs/homework-6/README.md) описывает Compose-стенд с RabbitMQ и двумя репликами API, доставку WebSocket-событий и восстановление обработки после остановки брокера.
+
 ## Настройка
 
 При отсутствии `.env` создать файл из шаблона.

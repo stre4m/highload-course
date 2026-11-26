@@ -74,12 +74,19 @@ public sealed class PostStore(NpgsqlDataSource dataSource)
         return await reader.ReadAsync(ct) ? ReadPost(reader) : null;
     }
 
-    internal async Task<Guid> CreateAsync(Guid authorId, string text, CancellationToken ct)
+    internal async Task<Guid> CreateAsync(Guid authorId, string text, CancellationToken ct, bool enqueue = false)
     {
         var id = Guid.NewGuid();
-        await using var command = dataSource.CreateCommand("""
+        var sql = enqueue ? """
+            WITH inserted AS (
+                INSERT INTO posts (id, author_id, text, feed_delayed)
+                VALUES (@id, @author_id, @text, true) RETURNING id
+            )
+            INSERT INTO feed_outbox (post_id) SELECT id FROM inserted
+            """ : """
             INSERT INTO posts (id, author_id, text) VALUES (@id, @author_id, @text)
-            """);
+            """;
+        await using var command = dataSource.CreateCommand(sql);
         command.Parameters.AddWithValue("id", id);
         command.Parameters.AddWithValue("author_id", authorId);
         command.Parameters.AddWithValue("text", text);
@@ -110,17 +117,28 @@ public sealed class PostStore(NpgsqlDataSource dataSource)
 
     internal async Task<bool> AddFriendAsync(Guid userId, Guid friendId, CancellationToken ct)
     {
-        await using var command = dataSource.CreateCommand("""
+        await using var connection = await dataSource.OpenConnectionAsync(ct);
+        await using var transaction = await connection.BeginTransactionAsync(ct);
+        // Сериализуем изменение подписки и построение адресатов поста одного автора.
+        await using var authorLock = new NpgsqlCommand("""
+            SELECT pg_advisory_xact_lock(hashtextextended(@friend_id::text, 0))
+            """, connection, transaction);
+        authorLock.Parameters.AddWithValue("friend_id", friendId);
+        await authorLock.ExecuteNonQueryAsync(ct);
+
+        await using var command = new NpgsqlCommand("""
             WITH friend AS (SELECT id FROM users WHERE id = @friend_id),
                  inserted AS (
                      INSERT INTO friendships (user_id, friend_id)
                      SELECT @user_id, id FROM friend ON CONFLICT DO NOTHING
                  )
             SELECT EXISTS (SELECT 1 FROM friend)
-            """);
+            """, connection, transaction);
         command.Parameters.AddWithValue("user_id", userId);
         command.Parameters.AddWithValue("friend_id", friendId);
-        return await command.ExecuteScalarAsync(ct) is true;
+        var exists = await command.ExecuteScalarAsync(ct) is true;
+        await transaction.CommitAsync(ct);
+        return exists;
     }
 
     internal async Task<bool> DeleteFriendAsync(Guid userId, Guid friendId, CancellationToken ct)
