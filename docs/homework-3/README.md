@@ -1,6 +1,5 @@
 # ДЗ №3. Репликация PostgreSQL
 
-- Дата прогона — 26 ноября 2026 года.
 - [Условия OTUS](https://otus.ru/events/highload_ol2/511/).
 - [Репозиторий исходного кода](https://github.com/stre4m/highload-course).
 - [Compose](../../infrastructure/homework-3/compose.yaml), [план JMeter](../../scripts/replication-reads.jmx).
