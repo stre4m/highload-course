@@ -154,6 +154,8 @@ jmeter -n -t scripts/replication-reads.jmx -Jhost=127.0.0.1 -Jport=5084 -Jprofil
 
 В отдельном предыдущем прогоне JMeter через CLI счётчики PostgreSQL показали прирост 0 на primary, 55 375 на первой реплике и 55 124 на второй. Архив этой проверки содержит [JTL](jmeter/reads-jtl.zip), [Statistics primary](jmeter/primary-statistics.json) и [Statistics реплик](jmeter/replicas-statistics.json).
 
+Сводки этого прогона доступны на скриншотах [primary](jmeter/primary-dashboard.png) и [реплик](jmeter/replicas-dashboard.png).
+
 ## Синхронный кворум и отказ
 
 Эта часть относится к отдельному контрольному прогону записи через `psql`. План JMeter выше проверяет чтение.
