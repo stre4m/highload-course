@@ -6,7 +6,13 @@
 
 Хеш пароля хранится в формате ASP.NET Core Identity V3. Хеш вычисляется с индивидуальной случайной солью методом PBKDF2-HMAC-SHA512 с 210 000 итераций.
 
-При первом запуске на пустом томе PostgreSQL создаёт базу из `POSTGRES_DB` и выполняет `001_create_users.sql` из `/docker-entrypoint-initdb.d`.
+При первом запуске на пустом томе PostgreSQL создаёт базу из `POSTGRES_DB` и выполняет `001_create_users.sql` и `003_posts_and_friends.sql` из `/docker-entrypoint-initdb.d`.
+
+## Посты и друзья
+
+[003_posts_and_friends.sql](../infrastructure/sql/003_posts_and_friends.sql) создаёт таблицы `posts` и `friendships` в одной транзакции. `posts` хранит UUID поста, UUID автора, текст и время создания. Индекс `posts_author_created_idx` покрывает выборку последних постов автора по `author_id, created_at DESC, id DESC`.
+
+Первичный ключ `friendships` состоит из `user_id` и `friend_id`. Ограничение запрещает связь пользователя с собой. Обратный индекс `friendships_friend_user_idx` используется при поиске подписчиков автора для инвалидации. Ссылки на `users` используют каскадное удаление.
 
 ## Индекс префиксного поиска
 
@@ -27,3 +33,9 @@ podman compose --env-file .env -f infrastructure/compose.yaml exec -T postgres p
 ```
 
 В конфигурации с изменёнными `POSTGRES_USER` или `POSTGRES_DB` аргументы `-U` и `-d` задаются по фактическим параметрам существующей базы.
+
+Для существующей базы с таблицей `users` применить `003_posts_and_friends.sql` отдельно после проверки целевой базы и согласования изменения схемы. Команда применяется при наличии файла в контейнере PostgreSQL согласно актуальной конфигурации Compose.
+
+```powershell
+podman compose --env-file .env -f infrastructure/compose.yaml exec -T postgres psql -U appuser -d app_dev -v ON_ERROR_STOP=1 -f /docker-entrypoint-initdb.d/003_posts_and_friends.sql
+```

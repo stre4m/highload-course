@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi;
 using Npgsql;
+using SocialNetwork;
 using SocialNetwork.OpenApi;
 using SocialNetwork.Controllers;
 
@@ -29,6 +30,10 @@ builder.Services.AddSingleton(services =>
     return new UserStore(primary, reader);
 });
 builder.Services.AddSingleton<PasswordHasher<string>>();
+builder.Services.AddSingleton<PostStore>();
+builder.Services.AddSingleton<FeedRefreshQueue>();
+builder.Services.AddSingleton<FeedCache>();
+builder.Services.AddHostedService<FeedRefreshWorker>();
 builder.Services.Configure<PasswordHasherOptions>(options => options.IterationCount = 210_000);
 builder.Services.AddControllers()
     .AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower)

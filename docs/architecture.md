@@ -10,4 +10,6 @@ ASP.NET Core Identity `PasswordHasher` вычисляет хеш пароля. A
 
 Стенд потоковой репликации разворачивается отдельным Compose-проектом. Параметры запуска и результаты приведены в [отчёте ДЗ №3](homework-3/README.md).
 
-Решения зафиксированы в [ADR-0001](decisions/0001-no-orm.md), [ADR-0002](decisions/0002-postgresql-preferred.md) и [ADR-0003](decisions/0003-postgresql-read-routing.md).
+Контроллеры `PostsController` и `FriendsController` передают операции ленты и записи в `FeedCache`. `PostStore` выполняет запросы постов и связей через основной пул PostgreSQL. Кеш поддерживает снимки авторов и готовые ленты подписчиков. После записи `FeedCache` инвалидирует затронутые записи и ставит задачи фонового обновления в `FeedRefreshQueue`. Обработчик `FeedRefreshWorker` обновляет ленты. Режим работы и границы согласованности зафиксированы в [ADR-0004](decisions/0004-friend-feed-cache.md).
+
+Решения о доступе к данным и маршрутизации зафиксированы в [ADR-0001](decisions/0001-no-orm.md), [ADR-0002](decisions/0002-postgresql-preferred.md) и [ADR-0003](decisions/0003-postgresql-read-routing.md).
