@@ -12,4 +12,6 @@ ASP.NET Core Identity `PasswordHasher` вычисляет хеш пароля. A
 
 Контроллеры `PostsController` и `FriendsController` передают операции ленты и записи в `FeedCache`. `PostStore` выполняет запросы постов и связей через основной пул PostgreSQL. Кеш поддерживает снимки авторов и готовые ленты подписчиков. После записи `FeedCache` инвалидирует затронутые записи и ставит задачи фонового обновления в `FeedRefreshQueue`. Обработчик `FeedRefreshWorker` обновляет ленты. Режим работы и границы согласованности зафиксированы в [ADR-0004](decisions/0004-friend-feed-cache.md).
 
-Решения о доступе к данным и маршрутизации зафиксированы в [ADR-0001](decisions/0001-no-orm.md), [ADR-0002](decisions/0002-postgresql-preferred.md) и [ADR-0003](decisions/0003-postgresql-read-routing.md).
+`DialogsController` обслуживает отправку и чтение сообщений через `DialogStore`. Хранилище проверяет собеседника и получает карту бакета из основного PostgreSQL за один запрос. Отдельные пулы Npgsql направляют записи и чтения на шарды. Выбор ключа и схема переключения зафиксированы в [ADR-0005](decisions/0005-dialog-sharding.md).
+
+Решения о доступе к данным и маршрутизации публичного чтения зафиксированы в [ADR-0001](decisions/0001-no-orm.md), [ADR-0002](decisions/0002-postgresql-preferred.md) и [ADR-0003](decisions/0003-postgresql-read-routing.md).

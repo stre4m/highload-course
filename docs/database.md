@@ -14,6 +14,14 @@
 
 Первичный ключ `friendships` состоит из `user_id` и `friend_id`. Ограничение запрещает связь пользователя с собой. Обратный индекс `friendships_friend_user_idx` используется при поиске подписчиков автора для инвалидации. Ссылки на `users` используют каскадное удаление.
 
+## Диалоги
+
+На [стенде ДЗ №5](homework-5/README.md) база `app_dialogs` хранит пользователей и таблицу `dialog_routes`. Инициализация выполняется скриптом [dialog-routes.sql](../infrastructure/homework-5/dialog-routes.sql). Первичный ключ `(bucket, generation)` ограничивает один маршрут для бакета в каждом поколении.
+
+Каждый шард использует собственный экземпляр PostgreSQL и базу `dialogs`. Скрипт [dialog-messages.sql](../infrastructure/homework-5/dialog-messages.sql) создаёт таблицу `dialog_messages`. Первичный ключ `(bucket, user_low, user_high, message_id)` поддерживает чтение по трём начальным полям. Ограничения проверяют диапазон бакета, порядок UUID участников и принадлежность отправителя к паре. Время `sent_at` задаётся сервером шарда.
+
+Имена шардов в каталоге соответствуют ключам `DialogShards__<имя>` в конфигурации API. Каждому ключу соответствует строка подключения и отдельный пул Npgsql.
+
 ## Индекс префиксного поиска
 
 Скрипт [002_users_search_prefix.sql](../infrastructure/sql/002_users_search_prefix.sql) создаёт составной B-tree по `second_name` и `first_name` с классом операторов `varchar_pattern_ops`. Эксперимент применяет скрипт после базовых замеров в изолированной `app_tests_k6` или `app_tests_jmeter`. Локальная инициализация Compose применяет `001_create_users.sql`. Для применения индекса в `app_dev` требуется отдельное согласование изменения схемы.

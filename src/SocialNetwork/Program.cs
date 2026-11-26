@@ -31,6 +31,9 @@ builder.Services.AddSingleton(services =>
 });
 builder.Services.AddSingleton<PasswordHasher<string>>();
 builder.Services.AddSingleton<PostStore>();
+builder.Services.AddSingleton(services => new DialogStore(
+    services.GetRequiredService<NpgsqlDataSource>(),
+    builder.Configuration.GetSection("DialogShards")));
 builder.Services.AddSingleton<FeedRefreshQueue>();
 builder.Services.AddSingleton<FeedCache>();
 builder.Services.AddHostedService<FeedRefreshWorker>();
