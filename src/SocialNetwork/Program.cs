@@ -16,7 +16,18 @@ if (string.IsNullOrWhiteSpace(connectionString))
     throw new InvalidOperationException("Set ConnectionStrings__Postgres before starting the application.");
 
 builder.Services.AddSingleton(_ => NpgsqlDataSource.Create(connectionString));
-builder.Services.AddSingleton<UserStore>();
+var readConnectionString = builder.Configuration.GetConnectionString("PostgresRead");
+if (!string.IsNullOrWhiteSpace(readConnectionString))
+{
+    builder.Services.AddKeyedSingleton("public-reads", (_, _) => NpgsqlDataSource.Create(readConnectionString));
+}
+
+builder.Services.AddSingleton(services =>
+{
+    var primary = services.GetRequiredService<NpgsqlDataSource>();
+    var reader = services.GetKeyedService<NpgsqlDataSource>("public-reads") ?? primary;
+    return new UserStore(primary, reader);
+});
 builder.Services.AddSingleton<PasswordHasher<string>>();
 builder.Services.Configure<PasswordHasherOptions>(options => options.IterationCount = 210_000);
 builder.Services.AddControllers()

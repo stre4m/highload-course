@@ -70,7 +70,7 @@ public sealed class UsersController(UserStore users, PasswordHasher<string> hash
         if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var id))
             return Unauthorized();
 
-        var profile = await users.GetAsync(id, ct);
+        var profile = await users.GetCurrentAsync(id, ct);
         return profile is null ? NotFound() : Ok(profile);
     }
 

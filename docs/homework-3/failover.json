@@ -1,0 +1,31 @@
+{
+  "original_replication": [
+    "replica1|streaming|quorum",
+    "replica2|streaming|quorum"
+  ],
+  "original_settings": "on|ANY 1 (replica1, replica2)",
+  "seconds_until_primary_stopped": 8.616829900012817,
+  "attempted": 32,
+  "acknowledged_before_kill_request": 24,
+  "acknowledged": 27,
+  "unconfirmed_ids": [
+    "1e5948de-686b-4f77-a2be-2a9affd8f381",
+    "416d85ce-c3cf-4ebf-8b9b-e34c52d8d6d9",
+    "86e176bd-3569-4ae8-b458-0d2d39ea1592",
+    "bc83c28f-1def-4804-8b54-5772d0425c30",
+    "f9f85f23-df15-46df-b353-0057b7029db6"
+  ],
+  "stored_before_control": 27,
+  "committed_without_ack": [],
+  "missing_acknowledged_ids": [],
+  "replayed_lsn": {
+    "replica1": "0/702A730",
+    "replica2": "0/702A730"
+  },
+  "promoted": "replica1",
+  "follower": "replica2",
+  "restored_replication": [
+    "replica2|streaming|quorum"
+  ],
+  "control_id_visible_on_follower": "ca2512a1-0715-459b-886b-c3f6d71ae601"
+}

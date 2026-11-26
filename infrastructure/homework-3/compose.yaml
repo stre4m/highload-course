@@ -1,0 +1,70 @@
+name: social-network-hw3
+
+x-postgres-env: &postgres-env
+  POSTGRES_USER: appuser
+  POSTGRES_DB: app_tests_replication
+  POSTGRES_PASSWORD: ${HW3_POSTGRES_PASSWORD:?Set HW3_POSTGRES_PASSWORD}
+  PGPASSWORD: ${HW3_POSTGRES_PASSWORD:?Set HW3_POSTGRES_PASSWORD}
+
+x-postgres: &postgres
+  image: docker.io/library/postgres:17
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U appuser -d app_tests_replication"]
+    interval: 2s
+    timeout: 3s
+    retries: 45
+
+x-replica: &replica
+  <<: *postgres
+  entrypoint: ["/bin/sh", "/lab/standby.sh"]
+  depends_on:
+    primary:
+      condition: service_healthy
+
+services:
+  primary:
+    <<: *postgres
+    environment: *postgres-env
+    command: ["postgres", "-c", "wal_level=replica", "-c", "max_wal_senders=10", "-c", "wal_keep_size=128MB"]
+    volumes:
+      - primary_data:/var/lib/postgresql/data
+      - ../sql/001_create_users.sql:/docker-entrypoint-initdb.d/001_create_users.sql:ro
+      - ./primary-init.sh:/docker-entrypoint-initdb.d/010_replication.sh:ro
+
+  replica1:
+    <<: *replica
+    environment:
+      <<: *postgres-env
+      REPLICA_NAME: replica1
+    volumes:
+      - replica1_data:/var/lib/postgresql/data
+      - ./standby.sh:/lab/standby.sh:ro
+
+  replica2:
+    <<: *replica
+    environment:
+      <<: *postgres-env
+      REPLICA_NAME: replica2
+    volumes:
+      - replica2_data:/var/lib/postgresql/data
+      - ./standby.sh:/lab/standby.sh:ro
+
+  api:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: "8080"
+      Logging__LogLevel__Default: Warning
+      ConnectionStrings__Postgres: "${HW3_POSTGRES_WRITE:-Host=primary;Database=app_tests_replication}"
+      ConnectionStrings__PostgresRead: "${HW3_POSTGRES_READ:-}"
+      PGUSER: appuser
+      PGPASSWORD: ${HW3_POSTGRES_PASSWORD:?Set HW3_POSTGRES_PASSWORD}
+    ports:
+      - "127.0.0.1:${HW3_API_PORT:-5084}:8080"
+
+volumes:
+  primary_data:
+  replica1_data:
+  replica2_data:

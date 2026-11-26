@@ -1,10 +1,10 @@
 using Npgsql;
 
-public sealed class UserStore(NpgsqlDataSource dataSource)
+public sealed class UserStore(NpgsqlDataSource primary, NpgsqlDataSource publicReads)
 {
     public async Task InsertAsync(Profile profile, string passwordHash, CancellationToken ct)
     {
-        await using var command = dataSource.CreateCommand("""
+        await using var command = primary.CreateCommand("""
             INSERT INTO users (id, first_name, second_name, birthdate, gender, biography, city, password_hash)
             VALUES (@id, @first_name, @second_name, @birthdate, @gender, @biography, @city, @password_hash)
             """);
@@ -21,14 +21,14 @@ public sealed class UserStore(NpgsqlDataSource dataSource)
 
     public async Task<string?> GetPasswordHashAsync(Guid id, CancellationToken ct)
     {
-        await using var command = dataSource.CreateCommand("SELECT password_hash FROM users WHERE id = @id");
+        await using var command = primary.CreateCommand("SELECT password_hash FROM users WHERE id = @id");
         command.Parameters.AddWithValue("id", id);
         return (string?)await command.ExecuteScalarAsync(ct);
     }
 
     public async Task<IReadOnlyList<UserSearchResult>> SearchAsync(string firstName, string lastName, CancellationToken ct)
     {
-        await using var command = dataSource.CreateCommand("""
+        await using var command = publicReads.CreateCommand("""
             SELECT id, first_name, second_name, birthdate, biography, city
             FROM users
             WHERE first_name LIKE @first_name ESCAPE '!'
@@ -54,7 +54,13 @@ public sealed class UserStore(NpgsqlDataSource dataSource)
         .Replace("%", "!%")
         .Replace("_", "!_") + "%";
 
-    public async Task<Profile?> GetAsync(Guid id, CancellationToken ct)
+    public Task<Profile?> GetAsync(Guid id, CancellationToken ct) =>
+        GetProfileAsync(publicReads, id, ct);
+
+    public Task<Profile?> GetCurrentAsync(Guid id, CancellationToken ct) =>
+        GetProfileAsync(primary, id, ct);
+
+    private static async Task<Profile?> GetProfileAsync(NpgsqlDataSource dataSource, Guid id, CancellationToken ct)
     {
         await using var command = dataSource.CreateCommand("""
             SELECT id, first_name, second_name, birthdate, gender, biography, city
